@@ -9,6 +9,10 @@ app = Flask(__name__)
 def homePage():
     return render_template('register.html')
 
+@app.route('/login')
+def loginPage():
+    return render_template('login.html')    
+
 #if __name__ == '__main__':
  #   app.run(host='0.0.0.0', port=5000)
 if __name__ == '__main__':
