@@ -1,17 +1,27 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 # import os 
 app = Flask(__name__)
 # IS_DEV = app.env == 'development'
 # relative_path = os.environ.get('RELATIVE_PATH', './templates')
 
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def homePage():
-    return render_template('register.html')
+    if request.method == 'POST':
+        return redirect('/login')
+    if request.method == 'GET':
+        return render_template('register.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def loginPage():
-    return render_template('login.html')    
+    if request.method == 'POST':
+        return redirect('/lobby')
+    if request.method == 'GET':
+        return render_template('login.html')
+
+@app.route('/lobby')
+def lobby():
+    return render_template('lobby.html')   
 
 #if __name__ == '__main__':
  #   app.run(host='0.0.0.0', port=5000)
