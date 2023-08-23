@@ -17,11 +17,9 @@ def encode_password(password):
     encoded_bytes = base64.b64encode(password.encode('utf-8'))
     return encoded_bytes.decode('utf-8')
 
-
 def decode_password(encoded_password):
     decoded_bytes = base64.b64decode(encoded_password.encode('utf-8'))
     return decoded_bytes.decode('utf-8')
-
 
 def check_user_credentials(username, password):
     with open('users.csv', 'r', newline='') as file:
@@ -47,7 +45,6 @@ def add_user_to_csv(username, encoded_password):
 def index():
     return "WELCOME"
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -63,7 +60,6 @@ def register():
         
     return render_template('register.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -76,7 +72,6 @@ def login():
         else:
             return "Invalid credentials. Please try again."
     return render_template('login.html')
-
 
 @app.route('/logout')
 def logout():
@@ -98,7 +93,6 @@ def lobby():
     # else:
     #     return redirect('/login')
 
-
 @app.route('/chat/<room>', methods=['GET', 'POST'])
 def chat(room):
     if 'username' in session:
@@ -108,7 +102,6 @@ def chat(room):
         return render_template('chat.html', room=room)
     else:
         return redirect('/login')
-
 
 @app.route('/api/chat/<room>', methods=['POST'])
 def update_chat(room):
@@ -121,7 +114,6 @@ def update_chat(room):
         file.write(f'[{timestamp}] {username}: {message}\n')
     
     return jsonify({'status': 'success'})
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
