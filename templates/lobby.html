@@ -15,14 +15,14 @@
     <form method="POST">
       <label for="rname">room name:</label><br>
       <input type="text" id="rname" name="new_room"><br>
-      <input type="submit" name="Create" value="Create">
+      <input type="submit" name="Create" value="Create" >
     </form>
 
     <h3>Enter a chat room:</h3>
-    <form action="/" method="POST" id="chat-form">
+    <form action="chat" method="POST" id="chat-form">
         <label for="room">Room name:</label><br>
         <select name="room" id="room">
-            {% for room in room_names %}
+            {% for room in ['room1', 'room2'] %}
             <option value="{{ room }}">{{ room }}</option>
             {% endfor %}
         </select>
@@ -40,6 +40,7 @@
             var selectedRoom = document.getElementById('room').value;
             window.location.href = "/chat/" + selectedRoom; // Redirect to /chat/<room>
         });
+
     </script>
 </body>
 </html>
