@@ -7,10 +7,11 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
+# /*======================================================*/
 
 # Retrieve the room files path from environment variable
-#room_files_path = os.getenv('ROOM_FILES_PATH')
-room_files_path = "rooms/"
+#room_files_path = os.getenv('ROOMS_FILES_PATH')
+# room_files_path = "rooms/" /*======================================================*/
 
 # Helper functions for user authentication
 def encode_password(password):
@@ -38,12 +39,11 @@ def add_user_to_csv(username, encoded_password):
         writer = csv.writer(file)
         writer.writerow([username, encoded_password])
 
- 
 
 # Routes
 @app.route('/')
 def index():
-    return "WELCOME"
+    return redirect('/register')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -82,16 +82,16 @@ def logout():
 
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
-    # if 'username' in session:
+     if 'username' in session:
         if request.method == 'POST':
             room_name = request.form['new_room']
-            #todo:create room.txt
-            path=os.getenv('ROOM_FILES_PATH')+room_name+".txt"
+            path=os.getenv('ROOMS_FILES_PATH')+room_name+".txt"
             room =  open(path, 'w')  
-            return room_name
-        return render_template('lobby.html')  
-    # else:
-    #     return redirect('/login')
+            # add the room to the rooms list
+        return render_template('lobby.html')
+        all_rooms = os.listdir(os.getenv('ROOMS_FILES_PATH'))  
+     else:
+        return redirect('/login')
 
 @app.route('/chat/<room>', methods=['GET', 'POST'])
 def chat(room):

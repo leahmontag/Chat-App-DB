@@ -1,10 +1,3 @@
-!/bin/bash
-
-# Set environment variable for room files path
-export ROOM_FILES_PATH="/path/to/room/files"
-
-# Install required Python packages
-pip install flask
-
-# Run the Flask application
-python chatApp.py
+#!/bin/bash
+docker build -t project . 
+docker run --name chatApp -d -p 5000:5000 project

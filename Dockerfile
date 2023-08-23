@@ -10,6 +10,6 @@ COPY . .
 
 EXPOSE 5000
 
-ENV ROOM_FILES_PATH rooms/
+ENV ROOMS_FILES_PATH rooms/
 
 CMD [ "python", "./chatApp.py" ]
