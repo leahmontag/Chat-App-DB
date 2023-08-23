@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+from curses import flash
+from flask import Flask, render_template, request, redirect, session, flash, jsonify
 import csv
 import os
 import base64
@@ -26,12 +27,20 @@ def check_user_credentials(username, password):
     with open('users.csv', 'r', newline='') as file:
         reader = csv.reader(file)
         for row in reader:
-            if row[0] == username and decode_password(row[1]) == password:
-                return True
+            if len(row) >= 2 and row[0] == username:
+                if decode_password(row[1]) != password:
+                     return "user with that name already exist"
+                else:
+                     return "you already registered, please login"
     return False
 
+def add_user_to_csv(username, encoded_password):
+    # Save user details to the CSV file
+    with open('users.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([username, encoded_password])
 
-
+ 
 
 # Routes
 @app.route('/')
@@ -45,15 +54,13 @@ def register():
         username = request.form['username']
         password = request.form['password']
         encoded_password = encode_password(password)
+        ans = check_user_credentials(username, password)
+        if not ans:
+            add_user_to_csv(username, encoded_password)
+            return redirect('/login')
+        else:
+            return ans
         
-        # Save user details to the CSV file
-        with open('readme.txt', 'w') as f:
-            f.write('Create a new text file!')
-        with open('users.csv', 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([username, encoded_password])
-        
-        return redirect('/login')
     return render_template('register.html')
 
 
@@ -77,17 +84,19 @@ def logout():
     return redirect('/login')
 
 
+
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
-    if 'username' in session:
+    # if 'username' in session:
         if request.method == 'POST':
             room_name = request.form['new_room']
             #todo:create room.txt
-            print("CREATED NEW ROOM NAMED: " + room_name )
-
+            path=os.getenv('ROOM_FILES_PATH')+room_name+".txt"
+            room =  open(path, 'w')  
+            return room_name
         return render_template('lobby.html')  
-    else:
-        return redirect('/login')
+    # else:
+    #     return redirect('/login')
 
 
 @app.route('/chat/<room>', methods=['GET', 'POST'])
@@ -115,4 +124,4 @@ def update_chat(room):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
