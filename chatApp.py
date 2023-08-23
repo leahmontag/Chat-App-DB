@@ -11,19 +11,10 @@ def homePage():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # with open('./temp.csv', 'w') as f:
-        #     w = csv.writer(f)
-        #     w.writerow(["llll"])
-
-        # with open('./users.csv', 'w', newline='') as csv_file: 
-        #        users_info = csv.writer(csv_file)
-        #        data = "[username]"
-        #        users_info.writerow(data)
-
-        #        #data = [[username, password]]  
-        #        #a.writerow(data)
-     
-        #return username, password
+        f = open('users.csv', 'a')
+        writer = csv.writer(f)
+        writer.writerow([username,password])
+        f.close()
         return redirect('/login')
     if request.method == 'GET':
         return render_template('register.html')
