@@ -11,6 +11,7 @@ app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
 # Retrieve the room files path from environment variable
 #room_files_path = os.getenv('ROOMS_FILES_PATH')
+
 # room_files_path = "rooms/" /*======================================================*/
 
 # Helper functions for user authentication
@@ -83,37 +84,55 @@ def logout():
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
      if 'username' in session:
+        
         if request.method == 'POST':
             room_name = request.form['new_room']
             path=os.getenv('ROOMS_FILES_PATH')+room_name+".txt"
             room =  open(path, 'w')  
             # add the room to the rooms list
-        return render_template('lobby.html')
-        all_rooms = os.listdir(os.getenv('ROOMS_FILES_PATH'))  
+        rooms = os.listdir(os.getenv('ROOMS_FILES_PATH'))
+        new_rooms = [x[:-4] for x in rooms]
+        return render_template('lobby.html', all_rooms=new_rooms)
      else:
         return redirect('/login')
+
+# @app.route('/chat/<room>', methods=['GET', 'POST'])
+# def chat(room):
+#     if 'username' in session:
+#         if request.method == 'POST':
+#             message = request.form['msg']
+#             print("MESSAGE RECEIVED IN CHAT " + message )
+#         return render_template('chat.html', room=room)
+#     else:
+#         return redirect('/login')
+    
+
+
 
 @app.route('/chat/<room>', methods=['GET', 'POST'])
 def chat(room):
     if 'username' in session:
-        if request.method == 'POST':
-            message = request.form['msg']
-            print("MESSAGE RECEIVED IN CHAT " + message )
         return render_template('chat.html', room=room)
     else:
         return redirect('/login')
+    
 
-@app.route('/api/chat/<room>', methods=['POST'])
+@app.route('/api/chat/<room>', methods=['GET','POST'])
 def update_chat(room):
-    message = request.json['message']
-    username = session['username']
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Append the message to the room's unique .txt file
-    with open(f'{room_files_path}/{room}.txt', 'a') as file:
-        file.write(f'[{timestamp}] {username}: {message}\n')
-    
-    return jsonify({'status': 'success'})
+    if request.method == 'POST':
+        message = request.form['msg']
+        username = session['username']
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Append the message to the room's unique .txt file
+        path=os.getenv('ROOMS_FILES_PATH')+room
+        with open(path, 'a', newline='') as file:
+            file.write(f'[{timestamp}] {username}: {message}\n')
+            
+    with open(f'rooms/{room}', 'r' ) as file:
+        file.seek(0)
+        lines = file.read()
+    return lines
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+

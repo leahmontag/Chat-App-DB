@@ -1,3 +1,3 @@
-#! bin/bash
-docker rmi -f project
+#!/bin/bash
 docker rm -f chatApp
+docker rmi -f project
