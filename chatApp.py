@@ -1,5 +1,5 @@
 import re
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 import csv 
 app = Flask(__name__)
 # IS_DEV = app.env == 'development'
@@ -26,12 +26,26 @@ def loginPage():
     if request.method == 'GET':
         return render_template('login.html')
 
+# @app.route('/lobby', methods=['GET', 'POST'])
+# def lobby():
+#     # if request.method == 'POST':
+#     #     return redirect('/chat')
+#     # if request.method == 'GET':
+#         return render_template('lobby.html')   
+
+
+
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
-    # if request.method == 'POST':
-    #     return redirect('/chat')
-    # if request.method == 'GET':
-        return render_template('lobby.html')   
+    if 'username' in session:
+        if request.method == 'POST':
+            room_name = request.form['new_room']
+            #todo:create room.txt
+            print("CREATED NEW ROOM NAMED: " + room_name )
+        return render_template('lobby.html')  
+    else:
+        return redirect('/login')
+
 
 # @app.route('/chat')
 # def chat_room():
