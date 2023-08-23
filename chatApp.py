@@ -7,7 +7,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
-# /*======================================================*/
+# app.config["SESSION_TYPE"] = "filesystem"/*======================================================*/
 
 # Retrieve the room files path from environment variable
 #room_files_path = os.getenv('ROOMS_FILES_PATH')
@@ -96,19 +96,6 @@ def lobby():
      else:
         return redirect('/login')
 
-# @app.route('/chat/<room>', methods=['GET', 'POST'])
-# def chat(room):
-#     if 'username' in session:
-#         if request.method == 'POST':
-#             message = request.form['msg']
-#             print("MESSAGE RECEIVED IN CHAT " + message )
-#         return render_template('chat.html', room=room)
-#     else:
-#         return redirect('/login')
-    
-
-
-
 @app.route('/chat/<room>', methods=['GET', 'POST'])
 def chat(room):
     if 'username' in session:
@@ -119,16 +106,16 @@ def chat(room):
 
 @app.route('/api/chat/<room>', methods=['GET','POST'])
 def update_chat(room):
+    path=os.getenv('ROOMS_FILES_PATH')+room+".txt"
     if request.method == 'POST':
         message = request.form['msg']
         username = session['username']
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Append the message to the room's unique .txt file
-        path=os.getenv('ROOMS_FILES_PATH')+room
         with open(path, 'a', newline='') as file:
             file.write(f'[{timestamp}] {username}: {message}\n')
             
-    with open(f'rooms/{room}', 'r' ) as file:
+    with open(path, 'r' ) as file:
         file.seek(0)
         lines = file.read()
     return lines
