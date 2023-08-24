@@ -1,20 +1,23 @@
 from curses import flash
-from flask import Flask, render_template, request, redirect, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, session
 import csv
 import os
 import base64
 from datetime import datetime
 
+#-----------------------------------------------------------------------------
+# Init
+#-----------------------------------------------------------------------------
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
-# app.config["SESSION_TYPE"] = "filesystem"/*======================================================*/
+os.makedirs("rooms")
 
-# Retrieve the room files path from environment variable
-#room_files_path = os.getenv('ROOMS_FILES_PATH')
+    
+#-----------------------------------------------------------------------------
+# Helper functions
+#-----------------------------------------------------------------------------
 
-# room_files_path = "rooms/" /*======================================================*/
-
-# Helper functions for user authentication
+#  For user authentication
 def encode_password(password):
     encoded_bytes = base64.b64encode(password.encode('utf-8'))
     return encoded_bytes.decode('utf-8')
@@ -40,8 +43,17 @@ def add_user_to_csv(username, encoded_password):
         writer = csv.writer(file)
         writer.writerow([username, encoded_password])
 
+#  For creating new room
+def valid_room_name(new_room_name):
+    rooms = os.listdir(os.getenv('ROOMS_FILES_PATH'))
+    for room in rooms:
+        if room == f'{new_room_name}.txt':
+            return False
+    return True
 
+#-----------------------------------------------------------------------------
 # Routes
+#-----------------------------------------------------------------------------
 @app.route('/')
 def index():
     return redirect('/register')
@@ -87,9 +99,12 @@ def lobby():
         
         if request.method == 'POST':
             room_name = request.form['new_room']
-            path=os.getenv('ROOMS_FILES_PATH')+room_name+".txt"
-            room =  open(path, 'w')  
-            # add the room to the rooms list
+            if valid_room_name(room_name):  
+                # Checking if the room name is unique 
+                path=os.getenv('ROOMS_FILES_PATH')+room_name+".txt"
+                room =  open(path, 'w')  
+            else:
+                return "Oops... There is already exist room named"+room_name+"please try another name"
         rooms = os.listdir(os.getenv('ROOMS_FILES_PATH'))
         new_rooms = [x[:-4] for x in rooms]
         return render_template('lobby.html', all_rooms=new_rooms)
@@ -119,6 +134,7 @@ def update_chat(room):
         file.seek(0)
         lines = file.read()
     return lines
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

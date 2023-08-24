@@ -1,3 +1,3 @@
 #!/bin/bash
-docker rm -f chatApp
-docker rmi -f project
+docker rm -f chat_con
+docker rmi -f chat_img
