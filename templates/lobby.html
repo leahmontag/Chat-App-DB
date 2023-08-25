@@ -5,35 +5,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App Lobby</title>
-
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/app.css') }}">
 </head>
 
 <body>
-    <h1>Hello, welcome to chat app!</h1>
+    <div class="container">
+        <div class="screen-looby">
+          <div class="screen__content-looby">
+            <h1>Hello, welcome to chat app!</h1>
+            <br></br>
+            <h2>This is the home page</h2>
+            <br></br>
+            <h3>Create a room:</h3>
+            <br></br>
+            <form method="POST">
+                <label for="rname">Room name:</label><br>
+                <!-- <input type="text" id="rname" name="new_room"><br> -->
 
-    <h2>This is the home page</h2>
+                <div class="login__field">
+                    <i class="login__icon fas fa-lock"></i>
+                    <input type="text" name="new_room" required="" class="login__input" placeholder="New Room">
+                  </div>
 
-    <h3>Create a room:</h3>
-    <form method="POST">
-        <label for="rname">room name:</label><br>
-        <input type="text" id="rname" name="new_room"><br>
-        <input type="submit" name="Create" value="Create">
-    </form>
+                <!-- <input type="submit" name="Create" value="Create"> -->
 
-    <h3>Enter a chat room:</h3>
-    <form action="chat" method="POST" id="chat-form">
-        <label for="room">Room name:</label><br>
-        <select name="room" id="room">
-            {% for room in all_rooms %}
-            <option value="{{ room }}">{{ room }}</option>
-            {% endfor %}
-        </select>
-        <input type="submit" name="enter" value="Enter">
-    </form>
+                <button class="button lobby__submit" name="Create" value="Create">
+                    <span class="button__text">Create</span>
+                    <i class="button__icon fas fa-chevron-right"></i>
+                  </button>	
+                  <br></br>
 
-    <br>
-    <br>
-    <a href="/logout">logout</a>
+            </form>
+        
+            <h3>Enter a chat room:</h3>
+            <br></br>
+            <form action="chat" method="POST" id="chat-form">
+                <label for="room">Room name:</label><br>
+                <select class="button lobby__submit" name="room" id="room">
+                    {% for room in all_rooms %}
+                    <option class="button__text" value="{{ room }}">{{ room }}</option>
+                    {% endfor %}
+                </select>
+                <!-- <input type="submit" name="enter" value="Enter"> -->
+
+                <button class="button lobby__submit"  name="enter" value="Enter">
+                    <span class="button__text">Enter</span>
+                    <i class="button__icon fas fa-chevron-right"></i>
+                  </button>	
+
+            </form>
+        
+            <br>
+            <a href="/logout">logout</a>
+        </div>		
+      </div>
+    </div>
+
+    <div class="screen__background">
+        <span class="screen__background__shape screen__background__shape4"></span>
+        <span class="screen__background__shape screen__background__shape3"></span>		
+        <span class="screen__background__shape screen__background__shape2"></span>
+        <span class="screen__background__shape screen__background__shape1"></span>
+      </div>
 
     <script>
         document.getElementById('chat-form').addEventListener('submit', function(event) {
