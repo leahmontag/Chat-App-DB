@@ -10,7 +10,8 @@ from datetime import datetime
 #-----------------------------------------------------------------------------
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
-os.makedirs("rooms")
+if not os.path.exists('rooms'):
+    os.makedirs("rooms")
 
     
 #-----------------------------------------------------------------------------
