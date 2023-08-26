@@ -124,6 +124,7 @@ def update_chat(room):
     path=os.getenv('ROOMS_FILES_PATH')+room+".txt"
     if request.method == 'POST':
         message = request.form['msg']
+   
         username = session['username']
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Append the message to the room's unique .txt file

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
-
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/app.css') }}">
 </head>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
@@ -33,20 +33,46 @@
   
     </script>
     <body>
-      <h1>Chat Room: {{ room }}</h1>
+      <div class="container">
+        <div class="screen-looby">
+          <div class="screen__content-looby">
+            
+            <h1>Chat Room: {{ room }}</h1>
+            <br></br>
 
-      <form id="inform" action="/api/chat/"+room method="POST">
-        Message:<input name="msg" type=text>
-        <input id="sendBtn" type="button" value="send">
-      </form>
-      <pre id="chatbox">Loading...</pre>
+            <form id="inform" action="/api/chat/"+room method="POST">
+              Message: <input class="button lobby__submit" name="msg" type="text">
+              <input class="button lobby__submit" id="sendBtn" type="button" value="send">
+        
+              <!-- <button class="button lobby__submit" id="sendBtn">
+                <span class="button__text">Send</span>
+                <i class="button__icon fas fa-chevron-right"></i>
+              </button>	    -->
+
+            </form>
+
+
+            <pre id="chatbox">Loading...</pre>
+            
+            <br>
+            <br>
+            <a href="/lobby">Back to lobby</a>
+            <br>
+            <br>
+            <a href="/logout">logout</a>
+          </div>		
+        </div>
+      </div>
       
-      <br>
-      <br>
-      <a href="/lobby">Back to lobby</a>
-      <br>
-      <br>
-      <a href="/logout">logout</a>
+     
+
+      <div class="screen__background">
+        <span class="screen__background__shape screen__background__shape4"></span>
+        <span class="screen__background__shape screen__background__shape3"></span>		
+        <span class="screen__background__shape screen__background__shape2"></span>
+        <span class="screen__background__shape screen__background__shape1"></span>
+      </div>	
+    
 
     </body>
   </html>
