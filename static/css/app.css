@@ -7,10 +7,16 @@
 	font-family: Raleway, sans-serif;
 }
 
+html {
+	overflow: hidden;
+  }
+
 body {
-	background: linear-gradient(90deg, #C7C5F4, #776BCC);
+	overflow: hidden;
+	background: #150463;
 	color: rgb(255, 255, 255);	
 	font-weight: bold;	
+	height: 100%;
 }
 
 
@@ -50,19 +56,19 @@ pre {
 }
 
 .screen {		
-	background: linear-gradient(90deg, #5D54A4, #7C78B8);		
+	background:  #3556c2;		
 	position: relative;	
 	height: 600px;
 	width: 360px;	
-	box-shadow: 0px 0px 24px #5C5696;
+	box-shadow: 0px 0px 24px #3a5bc9;
 }
 
 .screen-looby{		
-	background: linear-gradient(90deg, #5D54A4, #7C78B8);		
+	background:  #3556c2;		
 	position: relative;	
 	height: 600px;
 	width: 500px;	
-	box-shadow: 0px 0px 24px #5C5696;
+	box-shadow: 0px 0px 24px #3a5bc9;
 }
 
 .screen__content {
@@ -97,7 +103,7 @@ pre {
 .screen__background__shape1 {
 	height: 200px;
 	width: 520px;
-	background: #FFF;	
+	background: rgb(248, 197, 30);	
 	top: -50px;
 	right: 60px;	
 	border-radius: 0 72px 0 0;
@@ -106,7 +112,7 @@ pre {
 .screen__background__shape2 {
 	height: 220px;
 	width: 220px;
-	background: #6C63AC;	
+	background: #3556c2;	
 	top: -172px;
 	right: 0;	
 	border-radius: 32px;
@@ -115,7 +121,7 @@ pre {
 .screen__background__shape3 {
 	height: 540px;
 	width: 190px;
-	background: linear-gradient(270deg, #5D54A4, #6A679E);
+	background: #51eea5;
 	top: -24px;
 	right: 0;	
 	border-radius: 32px;
@@ -124,7 +130,7 @@ pre {
 .screen__background__shape4 {
 	height: 400px;
 	width: 200px;
-	background: #7E7BB9;	
+	background: #fc3da6;	
 	top: 420px;
 	right: 50px;	
 	border-radius: 60px;
@@ -162,7 +168,7 @@ pre {
 .login__input:focus,
 .login__input:hover {
 	outline: none;
-	border-bottom-color: #6A679E;
+	border-bottom-color: #fc3da6;
 }
 
 .login__submit {
@@ -177,8 +183,8 @@ pre {
 	display: flex;
 	align-items: center;
 	width: 100%;
-	color: #4C489D;
-	box-shadow: 0px 2px 2px #5C5696;
+	color: #3a5bc9;
+	box-shadow: 0px 2px 2px #fc3da6;
 	cursor: pointer;
 	transition: .2s;
 }
@@ -195,8 +201,8 @@ pre {
 	display:inline-flex;
 	align-items: center;
 	width: auto;
-	color: #4C489D;
-	box-shadow: 0px 2px 2px #5C5696;
+	color: #3a5bc9;
+	box-shadow: 0px 2px 2px #fc3da6;
 	cursor: pointer;
 	transition: .2s;
 }
@@ -204,7 +210,7 @@ pre {
 .login__submit:active,
 .login__submit:focus,
 .login__submit:hover {
-	border-color: #6A679E;
+	border-color: #51eea5;
 	outline: none;
 }
 
@@ -234,7 +240,7 @@ pre {
 	padding: 20px 10px;
 	color: #fff;
 	text-decoration: none;	
-	text-shadow: 0px 0px 8px #7875B5;
+	text-shadow: 0px 0px 8px #51eea5;
 }
 
 .social-login__icon:hover {

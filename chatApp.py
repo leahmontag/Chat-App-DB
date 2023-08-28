@@ -80,7 +80,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        if check_user_credentials(username, password):
+        if check_user_credentials(username, password) == "you already registered, please login":
             session['username'] = username
             return redirect('/lobby')
         else:
