@@ -8,12 +8,12 @@ RUN pip install -r requirements.txt
 
 ENV FLASK_ENV=development
 
-COPY . .
-
-EXPOSE 5000
-
 ENV ROOMS_FILES_PATH rooms/
 
 ENV CSV_PATH  data/users.csv
+
+EXPOSE 5000
+
+COPY . .
 
 CMD [ "python", "./chatApp.py" ]
