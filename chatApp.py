@@ -28,7 +28,7 @@ def decode_password(encoded_password):
     return decoded_bytes.decode('utf-8')
 
 def check_user_credentials(username, password):
-    with open('users.csv', 'r', newline='') as file:
+    with open(os.getenv("CSV_PATH"), 'r', newline='') as file:
         reader = csv.reader(file)
         for row in reader:
             if len(row) >= 2 and row[0] == username:
@@ -40,7 +40,7 @@ def check_user_credentials(username, password):
 
 def add_user_to_csv(username, encoded_password):
     # Save user details to the CSV file
-    with open('users.csv', 'a', newline='') as file:
+    with open(os.getenv("CSV_PATH"), 'a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([username, encoded_password])
 

@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.9-slim
 
 WORKDIR /code
 
@@ -13,5 +13,7 @@ COPY . .
 EXPOSE 5000
 
 ENV ROOMS_FILES_PATH rooms/
+
+ENV CSV_PATH  data/users.csv
 
 CMD [ "python", "./chatApp.py" ]
