@@ -9,7 +9,7 @@ from datetime import datetime
 # Init
 #-----------------------------------------------------------------------------
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Set a secret key for session management
+app.secret_key = 'chat@secret'  # Set a secret key for session management
 if not os.path.exists('rooms'):
     os.makedirs("rooms")
 
@@ -97,7 +97,6 @@ def logout():
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
      if 'username' in session:
-        
         if request.method == 'POST':
             room_name = request.form['new_room']
             if valid_room_name(room_name):  
@@ -105,7 +104,7 @@ def lobby():
                 path=os.getenv('ROOMS_FILES_PATH')+room_name+".txt"
                 room =  open(path, 'w')  
             else:
-                return "Oops... There is already exist room named"+room_name+"please try another name"
+                return "Oops... There is already exist room named "+room_name+" Please try another name"
         rooms = os.listdir(os.getenv('ROOMS_FILES_PATH'))
         new_rooms = [x[:-4] for x in rooms]
         return render_template('lobby.html', all_rooms=new_rooms)
