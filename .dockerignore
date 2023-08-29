@@ -1,0 +1,7 @@
+.git
+Dockerfile
+.gitignore
+.dockerignore
+.Python
+init.sh
+delete.sh
