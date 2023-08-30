@@ -4,6 +4,7 @@
 set -e  
 
 version=$1
+git_version="v${version}"
 commit_hash=$2
 if [ "" =  "$version" ] || [ "" = "$commit_hash" ]; then
     echo "Error: Missing parameters, Try run again with the version did you want and the commit hash"
