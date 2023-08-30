@@ -6,5 +6,8 @@ Dockerfile
 .Python
 init.sh
 delete.sh
+deploy.sh
+cleanup.sh
 mid.dockerfile
 large.dockerfile
+thin.dockerfile
