@@ -139,12 +139,15 @@ def update_chat(room):
 
 @app.route('/api/chat/<room>/clear', methods=['POST'])
 def clear_chat(room):
+    name_to_remove= session['username']
     path=os.getenv('ROOMS_FILES_PATH')+room+".txt"
-    if request.method == 'POST':
-        with open(path, 'w') as file:
-            file.write('')  
-            redirect('/chat/<room>')
-            
+    with open(path, 'r') as f:
+        lines = f.readlines()
+
+    with open(path, 'w') as f:
+        for line in lines:
+            if name_to_remove not in line:
+                f.write(line) 
 
 
 if __name__ == '__main__':
