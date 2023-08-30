@@ -13,6 +13,12 @@
         if (room=="") room = "general";
         return "/api/chat/"+room;
       }
+
+      function roomClear() {
+        var room = window.location.href.substring(window.location.href.lastIndexOf("/")+1);
+        if (room=="") room = "general";
+        return "/api/chat/"+room+"/clear";
+      }
   
       function updateChat() {
         $.get(room(), function(data) {
@@ -23,6 +29,10 @@
   
       function sendmessage() {
         $.post(room(), $("#inform").serialize() );
+      }
+
+      function clearMessage() {
+        $.post(roomClear(), $("#inform").serialize() );
       }
   
       $(document).ready(function() {
@@ -42,12 +52,11 @@
 
             <form id="inform" action="/api/chat/"+room method="POST">
               Message: <input class="button lobby__submit" name="msg" type="text">
-              <input class="button lobby__submit" id="sendBtn" type="button" value="send">
-        
-              <!-- <button class="button lobby__submit" id="sendBtn">
-                <span class="button__text">Send</span>
-                <i class="button__icon fas fa-chevron-right"></i>
-              </button>	    -->
+              <input class="button lobby__submit" id="sendBtn" type="button" value="send"  >
+
+              <br></br>
+              <input class="button lobby__submit" id="clearBtn" type="button" value="clear" onclick="clearMessage()">
+              <br></br>
 
             </form>
 
