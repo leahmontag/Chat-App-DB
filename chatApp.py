@@ -137,6 +137,16 @@ def update_chat(room):
     return lines
 
 
+@app.route('/api/chat/<room>/clear', methods=['POST'])
+def clear_chat(room):
+    path=os.getenv('ROOMS_FILES_PATH')+room+".txt"
+    if request.method == 'POST':
+        with open(path, 'w') as file:
+            file.write('')  
+            redirect('/chat/<room>')
+            
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
