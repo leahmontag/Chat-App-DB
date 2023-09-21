@@ -15,4 +15,4 @@ img_name_and_tag="chat_img:${version}"
 docker volume create chat-data
 docker build -t  $img_name_and_tag -f bonus.dockerfile .
 git tag ${version} ${commit_hash} 
-git push origin ${version}
+git push origin ${version} --tags
