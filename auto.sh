@@ -45,7 +45,7 @@ fi
 
 
 # Parse command-line options
-while [ $# -gt 0 ]; do
+while [ $# -gt 0 ]; do    
     case "$1" in (-i|--init)
             if [ -n "$2" ]; then
                 echo "Running init.sh with version $2"
@@ -69,10 +69,6 @@ while [ $# -gt 0 ]; do
         -c|--cleanup)
                     echo "Running cleanup.sh "
                     ./${script_folder}/cleanup.sh 
-                else
-                    echo "Error: Version argument is missing for -d option."
-                    display_usage
-                fi
         ;;
         -e|--exec)
             echo "Opening a bash shell as root inside the chat-app container"
@@ -81,10 +77,10 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         -de|--deploy)
-            if [ -n "$2" ] && [ -n "$3" ]; then
+            if [ -n "$2" ]; then
                 echo "Building, tagging, and pushing chat-app image with tag $2 to GCR."
                 echo "Optional: Tag and push commit hash $3"
-                ./${script_folder}/deploy.sh $2 $3
+               ./${script_folder}/deploy.sh $2 $3
                 shift 3
             else
                 echo "Error: Missing arguments for -de option."
