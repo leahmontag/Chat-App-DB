@@ -1,9 +1,11 @@
 from curses import flash
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 import csv
 import os
 import base64
 from datetime import datetime
+import mysql.connector
+
 
 #----------------------------------------------------------------------------
 # Init
@@ -27,22 +29,61 @@ def decode_password(encoded_password):
     decoded_bytes = base64.b64decode(encoded_password.encode('utf-8'))
     return decoded_bytes.decode('utf-8')
 
-def check_user_credentials(username, password):
-    with open(os.getenv("CSV_PATH"), 'r', newline='') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if len(row) >= 2 and row[0] == username:
-                if decode_password(row[1]) != password:
-                     return "user with that name already exist"
-                else:
-                     return "you already registered, please login"
-    return False
 
-def add_user_to_csv(username, encoded_password):
-    # Save user details to the CSV file
-    with open(os.getenv("CSV_PATH"), 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([username, encoded_password])
+def check_user_credentials(username, password):
+    config = {
+        'user': 'root',
+        'password': 'root',
+        'host': 'db',
+        'port': '3306',
+        'database': 'chat_app_db'
+    }
+    connection = mysql.connector.connect(**config)
+    cursor = connection.cursor()
+
+    # Check if the username already exists
+    cursor.execute("SELECT Pw FROM users WHERE Username = %s", (username,))
+    existing_password = cursor.fetchone()
+
+    if existing_password:
+        # Username already exists
+        #decoded_existing_password = decode_password(existing_password[0])
+        #if decoded_existing_password == password:
+        if existing_password[0] == password:
+            # Password matches, user can log in
+            cursor.close()
+            connection.close()
+            return "you already registered, please login"
+        else:
+            # Password doesn't match, user with that name already exists
+            cursor.close()
+            connection.close()
+            return "User with that name already exists"
+    else:
+        # Username is unique
+        cursor.close()
+        connection.close()
+        return None
+
+
+def add_user_to_db(username, encoded_password):
+    config = {
+        'user': 'root',
+        'password': 'root',
+        'host': 'db',
+        'port': '3306',
+        'database': 'chat_app_db'
+    }
+    connection = mysql.connector.connect(**config)
+    cursor = connection.cursor()
+    
+    # Insert user data into the database
+    cursor.execute("INSERT INTO users (Username, Pw) VALUES (%s, %s)", (username, encoded_password))
+    connection.commit()
+    
+    cursor.close()
+    connection.close()
+
 
 #  For creating new room
 def valid_room_name(new_room_name):
@@ -53,11 +94,33 @@ def valid_room_name(new_room_name):
     return True
 
 #-----------------------------------------------------------------------------
+# MySQL
+#-----------------------------------------------------------------------------
+def users_data():
+    config = {
+        'user': 'root',
+        'password': 'root',
+        'host': 'db',
+        'port': '3306',
+        'database': 'chat_app_db'
+    }
+    connection = mysql.connector.connect(**config)
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute('SELECT Username, Pw FROM users')
+    results = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return results
+
+
+
+#-----------------------------------------------------------------------------
 # Routes
 #-----------------------------------------------------------------------------
 @app.route('/')
 def index():
-    return redirect('/register')
+    return jsonify({'user Data': users_data()})
+    #return redirect('/register')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -67,7 +130,7 @@ def register():
         encoded_password = encode_password(password)
         ans = check_user_credentials(username, password)
         if not ans:
-            add_user_to_csv(username, encoded_password)
+            add_user_to_db(username, password)
             return redirect('/login')
         else:
             return ans
@@ -155,5 +218,8 @@ def health():
 
 
 if __name__ == '__main__':
+    #app.run(host='0.0.0.0')
     app.run(debug=True, host='0.0.0.0', port=5000)
+  
+
 
