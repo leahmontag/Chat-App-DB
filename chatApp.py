@@ -6,7 +6,10 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'chat@secret'  # Set a secret key for session management
 
+#-----------------------------------------------------------------------------
 # MySQL Configuration
+#-----------------------------------------------------------------------------
+
 db_config = {
     'user': 'root',
     'password': 'root',
@@ -15,7 +18,9 @@ db_config = {
     'database': 'chat_app_db'
 }
 
+#-----------------------------------------------------------------------------
 # Helper functions
+#-----------------------------------------------------------------------------
 
 def encode_password(password):
     encoded_bytes = base64.b64encode(password.encode('utf-8'))
@@ -87,7 +92,6 @@ def get_room_messages(room_name):
         )
         messages = cursor.fetchall()
 
-        #formatted_messages = [f"[{message['Timestamp']}] {message['Sender']}: {message['Message']}" for message in messages]
         message_list = []
         for message in messages:
             message_dict = {
@@ -126,6 +130,7 @@ def get_all_rooms():
 #-----------------------------------------------------------------------------
 # MySQL
 #-----------------------------------------------------------------------------
+
 def users_data():
     config = {
         'user': 'root',
