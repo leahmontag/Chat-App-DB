@@ -1,97 +1,127 @@
-from curses import flash
 from flask import Flask, render_template, request, redirect, session, jsonify
-import csv
-import os
+import mysql.connector
 import base64
 from datetime import datetime
-import mysql.connector
 
-
-#----------------------------------------------------------------------------
-# Init
-#----------------------------------------------------------------------------
 app = Flask(__name__)
 app.secret_key = 'chat@secret'  # Set a secret key for session management
-if not os.path.exists('rooms'):
-    os.makedirs("rooms")
 
-    
-#-----------------------------------------------------------------------------
+# MySQL Configuration
+db_config = {
+    'user': 'root',
+    'password': 'root',
+    'host': 'db',
+    'port': '3306',
+    'database': 'chat_app_db'
+}
+
 # Helper functions
-#-----------------------------------------------------------------------------
 
-#  For user authentication
 def encode_password(password):
     encoded_bytes = base64.b64encode(password.encode('utf-8'))
     return encoded_bytes.decode('utf-8')
 
-def decode_password(encoded_password):
-    decoded_bytes = base64.b64decode(encoded_password.encode('utf-8'))
-    return decoded_bytes.decode('utf-8')
-
-
 def check_user_credentials(username, password):
-    config = {
-        'user': 'root',
-        'password': 'root',
-        'host': 'db',
-        'port': '3306',
-        'database': 'chat_app_db'
-    }
-    connection = mysql.connector.connect(**config)
+    connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
 
-    # Check if the username already exists
     cursor.execute("SELECT Pw FROM users WHERE Username = %s", (username,))
     existing_password = cursor.fetchone()
 
-    if existing_password:
-        # Username already exists
-        #decoded_existing_password = decode_password(existing_password[0])
-        #if decoded_existing_password == password:
-        if existing_password[0] == password:
-            # Password matches, user can log in
-            cursor.close()
-            connection.close()
-            return "you already registered, please login"
-        else:
-            # Password doesn't match, user with that name already exists
-            cursor.close()
-            connection.close()
-            return "User with that name already exists"
-    else:
-        # Username is unique
+    if existing_password and existing_password[0] == password:
         cursor.close()
         connection.close()
-        return None
+        return "you already registered, please login"
+    else:
+        cursor.close()
+        connection.close()
+        return "User with that name already exists" if existing_password else None
 
-
-def add_user_to_db(username, encoded_password):
-    config = {
-        'user': 'root',
-        'password': 'root',
-        'host': 'db',
-        'port': '3306',
-        'database': 'chat_app_db'
-    }
-    connection = mysql.connector.connect(**config)
+def add_user_to_db(username, password):
+    connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
-    
-    # Insert user data into the database
-    cursor.execute("INSERT INTO users (Username, Pw) VALUES (%s, %s)", (username, encoded_password))
+    cursor.execute("INSERT INTO users (Username, Pw) VALUES (%s, %s)", (username, password))
     connection.commit()
-    
     cursor.close()
     connection.close()
 
 
-#  For creating new room
+def create_room(room_name):
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO rooms (Room_Name) VALUES (%s)", (room_name,))
+        connection.commit()
+
+        # Retrieve the Room_ID of the created room
+        cursor.execute("SELECT Room_ID FROM rooms WHERE Room_Name = %s", (room_name,))
+        room_id = cursor.fetchone()[0]
+        return room_id
+
+    finally:
+        cursor.close()
+        connection.close()
+    
+
+def create_room_message(room_id, sender, message, timestamp):
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        cursor.execute(
+            "INSERT INTO room_messages (Room_ID, Sender, Message, Timestamp) VALUES (%s, %s, %s, %s)",
+            (room_id, sender, message, timestamp)
+        )
+        connection.commit()
+    finally:
+        cursor.close()
+        connection.close()
+
+def get_room_messages(room_name):
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT Sender, Message, Timestamp FROM room_messages "
+            "INNER JOIN rooms ON room_messages.Room_ID = rooms.Room_ID "
+            "WHERE rooms.Room_Name = %s", (room_name,)
+        )
+        messages = cursor.fetchall()
+
+        #formatted_messages = [f"[{message['Timestamp']}] {message['Sender']}: {message['Message']}" for message in messages]
+        message_list = []
+        for message in messages:
+            message_dict = {
+                'Timestamp': message['Timestamp'],
+                'Sender': message['Sender'],
+                'Message': message['Message']
+            }
+            message_list.append(message_dict)
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return message_list
+
+
 def valid_room_name(new_room_name):
-    rooms = os.listdir(os.getenv('ROOMS_FILES_PATH'))
-    for room in rooms:
-        if room == f'{new_room_name}.txt':
-            return False
-    return True
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+    cursor.execute("SELECT Room_Name FROM rooms WHERE Room_Name = %s", (new_room_name,))
+    existing_room = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return existing_room is None
+
+def get_all_rooms():
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+    cursor.execute("SELECT Room_Name FROM rooms")
+    rooms = [row[0] for row in cursor.fetchall()]
+    cursor.close()
+    connection.close()
+    return rooms
+
 
 #-----------------------------------------------------------------------------
 # MySQL
@@ -112,29 +142,35 @@ def users_data():
     connection.close()
     return results
 
+def get_room_id_by_name(room_name):
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+    cursor.execute("SELECT Room_ID FROM rooms WHERE Room_Name = %s", (room_name,))
+    room_id = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return room_id[0] if room_id else None
 
 
 #-----------------------------------------------------------------------------
 # Routes
 #-----------------------------------------------------------------------------
+
 @app.route('/')
 def index():
     return jsonify({'user Data': users_data()})
-    #return redirect('/register')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        encoded_password = encode_password(password)
         ans = check_user_credentials(username, password)
         if not ans:
             add_user_to_db(username, password)
             return redirect('/login')
         else:
             return ans
-        
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -155,23 +191,18 @@ def logout():
     session.pop('username', None)
     return redirect('/login')
 
-
-
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
-     if 'username' in session:
+    if 'username' in session:
         if request.method == 'POST':
             room_name = request.form['new_room']
-            if valid_room_name(room_name):  
-                # Checking if the room name is unique 
-                path=os.getenv('ROOMS_FILES_PATH')+room_name+".txt"
-                room =  open(path, 'w')  
+            if valid_room_name(room_name):
+                room_id = create_room(room_name)  # Retrieve the Room_ID
             else:
-                return "Oops... There is already exist room named "+room_name+" Please try another name"
-        rooms = os.listdir(os.getenv('ROOMS_FILES_PATH'))
-        new_rooms = [x[:-4] for x in rooms]
-        return render_template('lobby.html', all_rooms=new_rooms)
-     else:
+                return "Oops... There is already an existing room named " + room_name + ". Please try another name"
+        rooms = get_all_rooms()
+        return render_template('lobby.html', all_rooms=rooms)
+    else:
         return redirect('/login')
 
 @app.route('/chat/<room>', methods=['GET', 'POST'])
@@ -180,46 +211,28 @@ def chat(room):
         return render_template('chat.html', room=room)
     else:
         return redirect('/login')
-    
 
-@app.route('/api/chat/<room>', methods=['GET','POST'])
+@app.route('/api/chat/<room>', methods=['GET', 'POST'])
 def update_chat(room):
-    path=os.getenv('ROOMS_FILES_PATH')+room+".txt"
     if request.method == 'POST':
         message = request.form['msg']
-   
         username = session['username']
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # Append the message to the room's unique .txt file
-        with open(path, 'a', newline='') as file:
-            file.write(f'[{timestamp}] {username}: {message}\n')
-            
-    with open(path, 'r' ) as file:
-        file.seek(0)
-        lines = file.read()
-    return lines
 
+        # Use the Room_ID when creating a message
+        room_id = get_room_id_by_name(room)
+        create_room_message(room_id, username, message, timestamp)
 
-@app.route('/api/chat/<room>/clear', methods=['POST'])
-def clear_chat(room):
-    name_to_remove= session['username']
-    path=os.getenv('ROOMS_FILES_PATH')+room+".txt"
-    with open(path, 'r') as f:
-        lines = f.readlines()
+    # Retrieve chat history for the specified room
+    messages = get_room_messages(room)
 
-    with open(path, 'w') as f:
-        for line in lines:
-            if name_to_remove not in line:
-                f.write(line) 
+    return messages
+
+        
 
 @app.route("/health")
 def health():
     return "OK", 200
 
-
 if __name__ == '__main__':
-    #app.run(host='0.0.0.0')
     app.run(debug=True, host='0.0.0.0', port=5000)
-  
-
-

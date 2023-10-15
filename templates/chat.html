@@ -20,12 +20,17 @@
         return "/api/chat/"+room+"/clear";
       }
   
-      function updateChat() {
-        $.get(room(), function(data) {
-          $("#chatbox").text(data);
-          window.setTimeout(updateChat, 1500);
-        })
-      }
+  function updateChat() {
+    $.get(room(), function(data) {
+        $("#chatbox").empty(); // Clear existing messages
+        data.forEach(function (message) {
+            var formattedMessage = "[" + message.Timestamp + "] " + message.Sender + ": " + message.Message;
+            $("#chatbox").append("<p>" + formattedMessage + "</p>");
+        });
+        window.setTimeout(updateChat, 1500);
+    });
+}
+
   
       function sendmessage() {
         $.post(room(), $("#inform").serialize() );
