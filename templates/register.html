@@ -29,6 +29,35 @@
                 <span class="button__text">Register</span>
                 <i class="button__icon fas fa-chevron-right"></i>
               </button>	
+
+
+         
+
+
+              {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="flash-messages">
+                  {% for message in messages %}
+                    {% if message %}
+                      <p class="flash-{{ message[1] }}">{{ message }}</p>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+          
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              var flashMessages = document.querySelectorAll('.flash-messages p');
+              flashMessages.forEach(function (message) {
+                setTimeout(function () {
+                  message.style.display = 'none';
+                }, 2000); // 2 seconds (2000 milliseconds)
+              });
+            });
+          </script>
+          
+
     
 
             <!-- <a href="#" onclick="submitForm();">

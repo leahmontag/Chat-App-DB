@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify, flash
 import mysql.connector
 import base64
 from datetime import datetime
@@ -22,25 +22,26 @@ db_config = {
 # Helper functions
 #-----------------------------------------------------------------------------
 
-def encode_password(password):
-    encoded_bytes = base64.b64encode(password.encode('utf-8'))
-    return encoded_bytes.decode('utf-8')
+def encode_decode_password(password):
+    encoded_decode_bytes = base64.b64encode(password.encode('utf-8'))
+    return encoded_decode_bytes.decode('utf-8')
 
 def check_user_credentials(username, password):
     connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
 
+    # Check if the username is already in the database
     cursor.execute("SELECT Pw FROM users WHERE Username = %s", (username,))
     existing_password = cursor.fetchone()
 
-    if existing_password and existing_password[0] == password:
-        cursor.close()
-        connection.close()
-        return "you already registered, please login"
+    if existing_password and existing_password[0] == password:     
+            cursor.close()
+            connection.close()
+            return "You are already registered. Please log in."
     else:
-        cursor.close()
-        connection.close()
-        return "User with that name already exists" if existing_password else None
+            cursor.close()
+            connection.close()
+            return "Password is incorrect / User with that name exist" # User with that name must be unique
 
 def add_user_to_db(username, password):
     connection = mysql.connector.connect(**db_config)
@@ -170,12 +171,13 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        ans = check_user_credentials(username, password)
-        if not ans:
-            add_user_to_db(username, password)
+        encoded_password = encode_decode_password(password)
+        ans = check_user_credentials(username, encoded_password)
+        if ans == "You are already registered. Please log in.":
+            flash(ans)
             return redirect('/login')
         else:
-            return ans
+            flash(ans, 'error')  # Flash the 'ans' variable with 'error' category
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -183,18 +185,25 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
-        if check_user_credentials(username, password) == "you already registered, please login":
+        encoded_password = encode_decode_password(password)
+        ans = check_user_credentials(username, encoded_password)
+        if ans == "You are already registered. Please log in.":
+            flash(ans, 'success')  # Flash the 'ans' variable with 'success' category
             session['username'] = username
             return redirect('/lobby')
         else:
-            return "Invalid credentials. Please try again."
+            flash("Invalid credentials. Please try again.", 'error')
     return render_template('login.html')
+
+
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)
+    session.pop('_flashes', None)  # Clear flash messages
     return redirect('/login')
+
+
 
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
