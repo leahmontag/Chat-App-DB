@@ -19,7 +19,11 @@ db_config = {
 }
 
 #-----------------------------------------------------------------------------
-# Helper functions
+# Helper functions with MySQL
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# Register ---------- Login
 #-----------------------------------------------------------------------------
 
 def encode_decode_password(password):
@@ -38,7 +42,7 @@ def check_user_credentials(username, password):
             cursor.close()
             connection.close()
             return "You are already registered. Please log in."
-    else:
+    elif existing_password :
             cursor.close()
             connection.close()
             return "Password is incorrect / User with that name exist" # User with that name must be unique
@@ -51,6 +55,10 @@ def add_user_to_db(username, password):
     cursor.close()
     connection.close()
 
+
+#-----------------------------------------------------------------------------
+# Rooms ------------- Chat Room
+#-----------------------------------------------------------------------------
 
 def create_room(room_name):
     try:
@@ -127,27 +135,6 @@ def get_all_rooms():
     connection.close()
     return rooms
 
-
-#-----------------------------------------------------------------------------
-# MySQL
-#-----------------------------------------------------------------------------
-
-def users_data():
-    config = {
-        'user': 'root',
-        'password': 'root',
-        'host': 'db',
-        'port': '3306',
-        'database': 'chat_app_db'
-    }
-    connection = mysql.connector.connect(**config)
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute('SELECT Username, Pw FROM users')
-    results = cursor.fetchall()
-    cursor.close()
-    connection.close()
-    return results
-
 def get_room_id_by_name(room_name):
     connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
@@ -155,7 +142,8 @@ def get_room_id_by_name(room_name):
     room_id = cursor.fetchone()
     cursor.close()
     connection.close()
-    return room_id[0] if room_id else None
+    return room_id[0] if room_id else None    
+
 
 
 #-----------------------------------------------------------------------------
@@ -164,7 +152,7 @@ def get_room_id_by_name(room_name):
 
 @app.route('/')
 def index():
-    return jsonify({'user Data': users_data()})
+    return redirect('/register')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -173,12 +161,19 @@ def register():
         password = request.form['password']
         encoded_password = encode_decode_password(password)
         ans = check_user_credentials(username, encoded_password)
+
         if ans == "You are already registered. Please log in.":
-            flash(ans)
+            flash(ans, 'success')
             return redirect('/login')
         else:
-            flash(ans, 'error')  # Flash the 'ans' variable with 'error' category
+            if not ans:
+                add_user_to_db(username, encoded_password)  # Add the user to the database
+                return redirect('/login')
+            else:
+                flash(ans, 'error')  # Flash the 'ans' variable with 'error' category
+
     return render_template('register.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -211,9 +206,9 @@ def lobby():
         if request.method == 'POST':
             room_name = request.form['new_room']
             if valid_room_name(room_name):
-                room_id = create_room(room_name)  # Retrieve the Room_ID
+               create_room(room_name)  # Retrieve the Room_ID
             else:
-                return "Oops... There is already an existing room named " + room_name + ". Please try another name"
+                flash("Oops... There is already an existing room named " + room_name + ". Please try another name", 'error')
         rooms = get_all_rooms()
         return render_template('lobby.html', all_rooms=rooms)
     else:
